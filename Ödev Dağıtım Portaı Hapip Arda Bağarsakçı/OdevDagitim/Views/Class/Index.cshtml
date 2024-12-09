@@ -1,0 +1,148 @@
+@{
+    ViewData["Title"] = "Sınıf Yönetimi";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Sınıf Yönetimi</h1>
+        <button class="btn btn-primary" onclick="showAddModal()">
+            <i class="fas fa-plus"></i> Yeni Sınıf Ekle
+        </button>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="classTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sınıf Adı</th>
+                            <th>Açıklama</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sınıf Ekleme/Düzenleme Modal -->
+<div class="modal fade" id="classModal" tabindex="-1" role="dialog" aria-labelledby="classModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="classModalLabel">Sınıf Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="classForm">
+                    <input type="hidden" id="classId" />
+                    <div class="form-group">
+                        <label for="className">Sınıf Adı</label>
+                        <input type="text" class="form-control" id="className" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Açıklama</label>
+                        <textarea class="form-control" id="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="saveClass()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadClasses();
+        });
+
+        function loadClasses() {
+            $.get('/Class/GetClasses', function (data) {
+                var tbody = $('#classTable tbody');
+                tbody.empty();
+                
+                data.forEach(function (item) {
+                    tbody.append(`
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.className}</td>
+                            <td>${item.description || ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="showEditModal(${item.id}, '${item.className}', '${item.description || ''}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteClass(${item.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        function showAddModal() {
+            $('#classId').val('');
+            $('#className').val('');
+            $('#description').val('');
+            $('#classModalLabel').text('Sınıf Ekle');
+            $('#classModal').modal('show');
+        }
+
+        function showEditModal(id, className, description) {
+            $('#classId').val(id);
+            $('#className').val(className);
+            $('#description').val(description);
+            $('#classModalLabel').text('Sınıf Düzenle');
+            $('#classModal').modal('show');
+        }
+
+        function saveClass() {
+            var classData = {
+                id: $('#classId').val() || 0,
+                className: $('#className').val(),
+                description: $('#description').val()
+            };
+
+            var url = classData.id == 0 ? '/Class/AddClass' : '/Class/UpdateClass';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(classData),
+                success: function (response) {
+                    if (response.success) {
+                        $('#classModal').modal('hide');
+                        loadClasses();
+                    }
+                },
+                error: function () {
+                    alert('Bir hata oluştu!');
+                }
+            });
+        }
+
+        function deleteClass(id) {
+            if (confirm('Bu sınıfı silmek istediğinizden emin misiniz?')) {
+                $.post('/Class/DeleteClass', { id: id }, function (response) {
+                    if (response.success) {
+                        loadClasses();
+                    }
+                });
+            }
+        }
+    </script>
+} 

@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+@model OdevDagitim.ViewModel.UserModel
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4">Hesap Oluştur</h4>
+                <form method="post" asp-action="Register" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label">Kullanıcı Adı</label>
+                        <input required asp-for="Username" class="form-control form-control-lg" placeholder="Kullanıcı adı girin" />
+                        <span class="text-danger" asp-validation-for="Username"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">E-Posta</label>
+                        <input required asp-for="Email" class="form-control form-control-lg" placeholder="E-posta adresinizi girin" />
+                        <span class="text-danger" asp-validation-for="Email"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PasswordHash" class="form-label">Parola</label>
+                        <input required asp-for="PasswordHash" class="form-control form-control-lg" type="password" placeholder="Parolanızı girin" />
+                        <span class="text-danger" asp-validation-for="PasswordHash"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PasswordHash" class="form-label">Parola Tekrar</label>
+                        <input required asp-for="PasswordHash" class="form-control form-control-lg" type="password" placeholder="Parolanızı tekrar girin" />
+                        <span class="text-danger" asp-validation-for="PasswordHash"></span>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <input type="submit" value="Kaydet" class="btn btn-primary btn-lg" />
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        <span>Hesabınız var mı? <a href="@Url.Action("Login", "User")" class="text-primary">Giriş Yap</a></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

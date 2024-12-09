@@ -1,0 +1,171 @@
+@using OdevDagitim.ViewModel
+@model AssignmentDetailViewModel
+@{
+    ViewData["Title"] = "Ödev Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Ödev Detayları</h6>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Geri Dön
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>@Model.Title</h5>
+                    <p class="text-muted">
+                        <i class="fas fa-user"></i> Öğretmen: @Model.TeacherName<br />
+                        <i class="fas fa-graduation-cap"></i> Sınıf: @Model.ClassName<br />
+                        <i class="fas fa-clock"></i> Son Teslim: @Model.DueDate.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Açıklama</h6>
+                            <p class="card-text">@Model.Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (User.IsInRole("Ogrenci"))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Ödev Durumu</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.UserSubmission != null)
+                        {
+                            <div class="alert @(Model.UserSubmission.IsLate ? "alert-warning" : "alert-success")">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-check-circle"></i> 
+                                        Ödev Teslim Edildi
+                                    </h6>
+                                    <span class="badge @(Model.UserSubmission.IsLate ? "bg-warning" : "bg-success")">
+                                        @(Model.UserSubmission.IsLate ? "Geç Teslim" : "Zamanında")
+                                    </span>
+                                </div>
+                                <hr>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <p>
+                                            <strong><i class="fas fa-calendar"></i> Teslim Tarihi:</strong><br>
+                                            @Model.UserSubmission.SubmissionDate.ToString("dd/MM/yyyy HH:mm")
+                                        </p>
+                                        <p>
+                                            <strong><i class="fas fa-file-alt"></i> Açıklama:</strong><br>
+                                            @(string.IsNullOrEmpty(Model.UserSubmission.Description) ? "Açıklama eklenmemiş" : Model.UserSubmission.Description)
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <a href="@Url.Action("DownloadSubmission", "Assignment", new { submissionId = Model.UserSubmission.Id })" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-download"></i> Dosyayı İndir
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (DateTime.Now > Model.DueDate)
+                        {
+                            <div class="alert alert-danger">
+                                <h6><i class="fas fa-exclamation-triangle"></i> Teslim Süresi Doldu</h6>
+                                <p>Bu ödevin teslim süresi dolmuştur. Artık teslim edilemez.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mb-4">
+                                <h6><i class="fas fa-info-circle"></i> Ödev Teslim Edilmedi</h6>
+                                <p>Henüz ödev teslimi yapmadınız. Son teslim tarihine kadar ödevinizi yükleyebilirsiniz.</p>
+                                <p><strong>Kalan Süre:</strong> @((Model.DueDate - DateTime.Now).Days) gün @((Model.DueDate - DateTime.Now).Hours) saat</p>
+                            </div>
+
+                            <form asp-action="Submit" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="AssignmentId" value="@Model.Id" />
+                                
+                                <div class="form-group mb-3">
+                                    <label>Açıklama</label>
+                                    <textarea name="Description" class="form-control" rows="3" 
+                                            placeholder="Ödeviniz hakkında açıklama ekleyebilirsiniz..."></textarea>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label>Ödev Dosyası</label>
+                                    <input type="file" name="File" class="form-control" accept=".pdf,.rar" required />
+                                    <small class="form-text text-muted">
+                                        İzin verilen dosya formatları: .pdf,.rar
+                                    </small>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload"></i> Ödevi Teslim Et
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("admin"))
+            {
+                <h6 class="font-weight-bold">Teslim Edilen Ödevler</h6>
+                @if (!Model.Submissions.Any())
+                {
+                    <div class="alert alert-info">
+                        Henüz ödev teslimi yapılmamış.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Öğrenci</th>
+                                    <th>Teslim Tarihi</th>
+                                    <th>Durum</th>
+                                    <th>Açıklama</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var submission in Model.Submissions.OrderByDescending(s => s.SubmissionDate))
+                                {
+                                    <tr>
+                                        <td>@submission.StudentName</td>
+                                        <td>@submission.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @if (submission.IsLate)
+                                            {
+                                                <span class="badge bg-warning">Geç Teslim</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Zamanında</span>
+                                            }
+                                        </td>
+                                        <td>@submission.Description</td>
+                                        <td>
+                                            <a href="@Url.Action("DownloadSubmission", "Assignment", new { submissionId = submission.Id })" 
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fas fa-download"></i> İndir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div> 

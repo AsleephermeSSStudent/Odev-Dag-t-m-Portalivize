@@ -1,0 +1,58 @@
+@using OdevDagitim.ViewModel
+@model AssignmentSubmitViewModel
+@{
+    ViewData["Title"] = "Ödev Teslim";
+}
+
+<div class="container">
+    <div class="card shadow">
+        <div class="card-header">
+            <h5 class="mb-0">@Model.AssignmentTitle - Ödev Teslimi</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert @(DateTime.Now > Model.DueDate ? "alert-danger" : "alert-info")">
+                <i class="fas fa-clock"></i> Son Teslim Tarihi: @Model.DueDate.ToString("dd/MM/yyyy HH:mm")
+                @if (DateTime.Now > Model.DueDate)
+                {
+                    <div class="mt-2">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Uyarı:</strong> Ödev teslim süresi dolmuştur! Geç teslim olarak işaretlenecektir.
+                    </div>
+                }
+            </div>
+
+            <form asp-action="Submit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="AssignmentId" />
+                
+                <div class="form-group">
+                    <label asp-for="Description">Açıklama</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" 
+                              placeholder="Ödeviniz hakkında açıklama ekleyebilirsiniz..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Ödev Dosyası</label>
+                    <input type="file" asp-for="File" class="form-control" accept=".pdf,.rar" required />
+                    <span asp-validation-for="File" class="text-danger"></span>
+                    <small class="form-text text-muted">
+                        İzin verilen dosya formatları: .pdf,.rar
+                    </small>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Ödevi Teslim Et
+                    </button>
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+@model OdevDagitim.ViewModel.LoginModel
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4">Giriş Yap</h4>
+                <form method="post" asp-action="Login" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label">Kullanıcı Adı</label>
+                        <input asp-for="UserName" class="form-control form-control-lg" placeholder="Kullanıcı adınızı girin" />
+                        <span class="text-danger" asp-validation-for="UserName"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Parola</label>
+                        <input asp-for="Password" class="form-control form-control-lg" type="password" placeholder="Parolanızı girin" />
+                        <span class="text-danger" asp-validation-for="Password"></span>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <input type="submit" value="Giriş Yap" class="btn btn-primary btn-lg" />
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        <span>Yeni hesabınız yok mu? <a href="@Url.Action("Register", "User")" class="text-primary">Kayıt Ol</a></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
